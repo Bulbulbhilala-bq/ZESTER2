@@ -3,7 +3,8 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from functools import wraps
-import sqlite3
+import psycopg2
+import psycopg2.extras
 import re
 import os
 import bleach
@@ -23,7 +24,8 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-DB = "zest.db"
+# ── DATABASE CONFIG (Supabase / Postgres) ────────────────────
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # ── ADMIN AUTH ───────────────────────────────────────────────
 ADMIN_KEY = os.getenv("ADMIN_API_KEY", "change-this-secret-key-in-production")
@@ -44,30 +46,32 @@ def index():
 
 # ── DATABASE SETUP ──────────────────────────────────────────
 def get_db():
-    conn = sqlite3.connect(DB)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     return conn
 
 def init_db():
     conn = get_db()
-    conn.executescript("""
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS newsletter (
-            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            id        SERIAL PRIMARY KEY,
             email     TEXT UNIQUE NOT NULL,
             joined_at TEXT NOT NULL
         );
-
+    """)
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS comments (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            post_id    TEXT NOT NULL,
-            name       TEXT NOT NULL,
-            email      TEXT NOT NULL,
-            message    TEXT NOT NULL,
-            created_at TEXT NOT NULL,
+            id          SERIAL PRIMARY KEY,
+            post_id     TEXT NOT NULL,
+            name        TEXT NOT NULL,
+            email       TEXT NOT NULL,
+            message     TEXT NOT NULL,
+            created_at  TEXT NOT NULL,
             is_approved INTEGER DEFAULT 0
         );
     """)
     conn.commit()
+    cur.close()
     conn.close()
     print("✅ Database ready!")
 
@@ -91,21 +95,28 @@ def subscribe():
     email = sanitize(data.get("email") or "", 254).lower()
     if not email or not is_valid_email(email):
         return jsonify({"success": False, "message": "Please enter a valid email address!"}), 400
+    conn = get_db()
+    cur = conn.cursor()
     try:
-        conn = get_db()
-        conn.execute("INSERT INTO newsletter (email, joined_at) VALUES (?, ?)", (email, now()))
+        cur.execute("INSERT INTO newsletter (email, joined_at) VALUES (%s, %s)", (email, now()))
         conn.commit()
-        conn.close()
         return jsonify({"success": True, "message": f"🎉 Welcome aboard! {email} subscribed."}), 201
-    except sqlite3.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
         return jsonify({"success": False, "message": "This email is already subscribed!"}), 409
+    finally:
+        cur.close()
+        conn.close()
 
 # 🔒 ADMIN ONLY — requires X-Admin-Key header
 @app.route("/api/newsletter/list", methods=["GET"])
 @require_admin
 def list_subscribers():
     conn = get_db()
-    rows = conn.execute("SELECT id, email, joined_at FROM newsletter ORDER BY id DESC").fetchall()
+    cur = conn.cursor()
+    cur.execute("SELECT id, email, joined_at FROM newsletter ORDER BY id DESC")
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
     return jsonify({"total": len(rows), "subscribers": [dict(r) for r in rows]})
 
@@ -115,10 +126,13 @@ def unsubscribe():
     data = request.get_json(silent=True) or {}
     email = sanitize(data.get("email") or "", 254).lower()
     conn = get_db()
-    cur = conn.execute("DELETE FROM newsletter WHERE email = ?", (email,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM newsletter WHERE email = %s", (email,))
     conn.commit()
+    rowcount = cur.rowcount
+    cur.close()
     conn.close()
-    if cur.rowcount:
+    if rowcount:
         return jsonify({"success": True, "message": f"{email} unsubscribed."})
     return jsonify({"success": False, "message": "Email not found."}), 404
 
@@ -140,11 +154,13 @@ def add_comment():
         return jsonify({"success": False, "message": "Comment is too short!"}), 400
 
     conn = get_db()
-    conn.execute(
-        "INSERT INTO comments (post_id, name, email, message, created_at, is_approved) VALUES (?, ?, ?, ?, ?, ?)",
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO comments (post_id, name, email, message, created_at, is_approved) VALUES (%s, %s, %s, %s, %s, %s)",
         (post_id, name, email, message, now(), 1)  # set 0 for manual moderation
     )
     conn.commit()
+    cur.close()
     conn.close()
     return jsonify({"success": True, "message": "Comment posted successfully! 🎉"}), 201
 
@@ -153,10 +169,13 @@ def add_comment():
 def get_comments(post_id):
     post_id = sanitize(post_id, 100)
     conn = get_db()
-    rows = conn.execute(
-        "SELECT id, name, message, created_at FROM comments WHERE post_id = ? AND is_approved = 1 ORDER BY id DESC",
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, name, message, created_at FROM comments WHERE post_id = %s AND is_approved = 1 ORDER BY id DESC",
         (post_id,)
-    ).fetchall()
+    )
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
     return jsonify({"post_id": post_id, "total": len(rows), "comments": [dict(r) for r in rows]})
 
@@ -165,10 +184,13 @@ def get_comments(post_id):
 @require_admin
 def delete_comment(comment_id):
     conn = get_db()
-    cur = conn.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM comments WHERE id = %s", (comment_id,))
     conn.commit()
+    rowcount = cur.rowcount
+    cur.close()
     conn.close()
-    if cur.rowcount:
+    if rowcount:
         return jsonify({"success": True, "message": "Comment deleted successfully."})
     return jsonify({"success": False, "message": "Comment not found."}), 404
 
@@ -177,9 +199,12 @@ def delete_comment(comment_id):
 @require_admin
 def admin_all_comments():
     conn = get_db()
-    rows = conn.execute(
+    cur = conn.cursor()
+    cur.execute(
         "SELECT id, post_id, name, email, message, created_at, is_approved FROM comments ORDER BY id DESC"
-    ).fetchall()
+    )
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
     return jsonify({"total": len(rows), "comments": [dict(r) for r in rows]})
 
@@ -188,10 +213,13 @@ def admin_all_comments():
 @require_admin
 def approve_comment(comment_id):
     conn = get_db()
-    cur = conn.execute("UPDATE comments SET is_approved = 1 WHERE id = ?", (comment_id,))
+    cur = conn.cursor()
+    cur.execute("UPDATE comments SET is_approved = 1 WHERE id = %s", (comment_id,))
     conn.commit()
+    rowcount = cur.rowcount
+    cur.close()
     conn.close()
-    if cur.rowcount:
+    if rowcount:
         return jsonify({"success": True, "message": "Comment approved."})
     return jsonify({"success": False, "message": "Comment not found."}), 404
 
