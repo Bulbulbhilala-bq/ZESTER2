@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZEST — A Creative Magazine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FDFAF4;
+      --ink: #1A1A2E;
+      --coral: #FF6B6B;
+      --yellow: #FFD93D;
+      --mint: #6BCB77;
+      --lavender: #A78BFA;
+      --sky: #74C0FC;
+      --card-radius: 18px;
+      --card-bg: #ffffff;
+      --muted: #555;
+      --muted-2: #777;
+      --border-soft: #ddd;
+      --shadow-color: var(--ink);
+    }
+
+    html[data-theme="dark"] {
+      --cream: #15151F;
+      --ink: #F5F3ED;
+      --card-bg: #1F1F2E;
+      --muted: #C7C5D6;
+      --muted-2: #9E9CB0;
+      --border-soft: #34344A;
+      --shadow-color: #0A0A12;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4vw;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--cream);
+      border-bottom: 2px solid var(--ink);
+      gap: 1rem;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: 1.8rem;
+      letter-spacing: -1px;
+      color: var(--ink);
+      text-decoration: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .logo span {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--ink);
+      padding: 0 6px;
+      transform: rotate(-2deg);
+      margin-left: 2px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      color: var(--ink);
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 2px;
+      background: var(--coral);
+      transition: width 0.25s;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: var(--ink);
+      color: var(--cream) !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 100px;
+      font-weight: 700 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--coral); }
+    .nav-cta::after { display: none !important; }
+
+    /* ── NAV ICON BUTTONS (search + theme toggle) ── */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover {
+      background: var(--ink);
+      color: var(--cream);
+    }
+    .theme-toggle .icon-moon { display: none; }
+    html[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    html[data-theme="dark"] .theme-toggle .icon-moon { display: inline; }
+
+    /* ── SEARCH OVERLAY ── */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(26,26,46,0.55);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 8vh 4vw 2rem;
+    }
+    .search-overlay.active { display: flex; }
+    .search-panel {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: var(--card-radius);
+      width: 100%;
+      max-width: 640px;
+      max-height: 78vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 8px 8px 0 var(--shadow-color);
+      animation: searchPop 0.25s ease both;
+    }
+    @keyframes searchPop {
+      from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .search-input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 1.1rem 1.3rem;
+      border-bottom: 2px solid var(--ink);
+    }
+    .search-input-row span.icon { font-size: 1.2rem; flex-shrink: 0; }
+    #search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+    #search-input::placeholder { color: var(--muted-2); }
+    .search-close {
+      flex-shrink: 0;
+      border: 2px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 100px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .search-close:hover { background: var(--ink); color: var(--cream); }
+    .search-results {
+      overflow-y: auto;
+      padding: 0.5rem 0.6rem 1rem;
+    }
+    .search-hint, .search-empty {
+      padding: 2rem 1.2rem;
+      text-align: center;
+      color: var(--muted-2);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 0.8rem;
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover { background: rgba(167,139,250,0.12); }
+    .search-result-thumb {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      border: 2px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .search-result-info { flex: 1; min-width: 0; }
+    .search-result-info h4 {
+      font-family: 'Fraunces', serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.2rem;
+    }
+    .search-result-info .srm {
+      font-size: 0.76rem;
+      color: var(--muted-2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .search-result-item mark {
+      background: var(--yellow);
+      color: var(--ink);
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 4rem 4vw 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      min-height: 85vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-blob {
+      position: absolute;
+      width: 520px; height: 520px;
+      border-radius: 50%;
+      background: var(--yellow);
+      opacity: 0.25;
+      top: -120px; right: -100px;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: blobFloat 8s ease-in-out infinite;
+    }
+    @keyframes blobFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(30px) scale(1.05); }
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--coral);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 0.3rem 0.85rem;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero-eyebrow::before { content: '✦'; font-size: 0.7rem; }
+    .hero-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3rem, 6vw, 6rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      margin-bottom: 1.4rem;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--coral);
+    }
+    .hero-title .underline-squiggle {
+      position: relative;
+      display: inline-block;
+    }
+    .hero-title .underline-squiggle::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      width: 100%; height: 8px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10'%3E%3Cpath d='M0,5 Q25,0 50,5 Q75,10 100,5 Q125,0 150,5 Q175,10 200,5' fill='none' stroke='%23FFD93D' stroke-width='3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 440px;
+      margin-bottom: 2rem;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 0.8rem 1.8rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 2px solid var(--ink);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-primary:hover { background: var(--coral); border-color: var(--coral); color: #fff; }
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      padding: 0.8rem 1.8rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 2px solid var(--ink);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { background: var(--ink); color: var(--cream); }
+
+    /* ── HERO IMAGE SIDE ── */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero-card-main {
+      width: 100%;
+      max-width: 480px;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 12px 12px 0 var(--coral);
+      transform: rotate(1.5deg);
+      transition: transform 0.4s ease;
+    }
+    .hero-card-main:hover { transform: rotate(0deg) scale(1.02); }
+    .hero-card-main .card-img {
+      width: 100%; height: 260px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-size: 5rem;
+      overflow: hidden;
+    }
+    .hero-card-main .card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero-card-main .card-body { padding: 1.5rem; }
+    .hero-card-main .tag {
+      background: var(--yellow);
+      color: var(--ink);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.7rem;
+      display: inline-block;
+    }
+    .hero-card-main h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+    .hero-card-main p { font-size: 0.88rem; opacity: 0.7; line-height: 1.5; }
+    .hero-meta {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-top: 1rem; font-size: 0.8rem; opacity: 0.6;
+    }
+    .hero-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--lavender);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      color: #1A1A2E;
+    }
+    .floating-pill {
+      position: absolute;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 100px;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 4px 4px 0 var(--ink);
+      color: var(--ink);
+    }
+    .pill-1 { top: 10px; left: -30px; transform: rotate(-6deg); background: var(--mint); }
+    .pill-2 { bottom: 40px; right: -20px; transform: rotate(5deg); background: var(--lavender); }
+
+    /* ── TICKER ── */
+    .ticker-wrap {
+      border-top: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+      background: var(--yellow);
+      overflow: hidden;
+      padding: 0.65rem 0;
+    }
+    .ticker-inner {
+      display: flex;
+      gap: 0;
+      white-space: nowrap;
+      animation: ticker 22s linear infinite;
+    }
+    .ticker-inner:hover { animation-play-state: paused; }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0 2rem;
+      color: #1A1A2E;
+    }
+    .ticker-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); flex-shrink: 0; }
+
+    /* ── SECTION HEADER ── */
+    .section { padding: 4rem 4vw; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    .section-title span { font-style: italic; color: var(--coral); }
+    .see-all {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-bottom: 2px solid var(--coral);
+      padding-bottom: 2px;
+      transition: color 0.2s;
+    }
+    .see-all:hover { color: var(--coral); }
+
+    /* ── CARD GRID ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.8rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 2px solid var(--ink);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 6px 8px 0 var(--shadow-color);
+    }
+    .card-thumb {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      border-bottom: 2px solid var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-thumb .bg-shape {
+      position: absolute;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      opacity: 0.3;
+      transition: transform 0.4s ease;
+    }
+    .card:hover .bg-shape { transform: scale(1.3); }
+    .card-thumb .emoji { position: relative; z-index: 1; }
+    .card-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.4s ease;
+    }
+    .card:hover .card-thumb img { transform: scale(1.08); }
+    .card-content { padding: 1.2rem 1.3rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .card-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      margin-bottom: 0.7rem;
+      border: 2px solid var(--ink);
+      color: var(--ink);
+    }
+    .card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.6rem;
+    }
+    .card-excerpt {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--muted-2);
+      border-top: 1px dashed var(--border-soft);
+      padding-top: 0.8rem;
+    }
+    .card-author { display: flex; align-items: center; gap: 0.45rem; }
+    .author-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; border: 2px solid var(--ink);
+      color: var(--ink);
+    }
+    .read-time { font-weight: 600; }
+
+    /* ── SHARE BUTTON ── */
+    .share-btn {
+      position: absolute;
+      top: 0.9rem;
+      right: 0.9rem;
+      z-index: 5;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background: var(--card-bg);
+      color: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0;
+    }
+    .card:hover .share-btn, .feature-wide:hover .share-btn { opacity: 1; }
+    .share-btn:hover { background: var(--ink); color: var(--cream); transform: scale(1.08); }
+    .feature-wide .share-btn { top: 1.2rem; right: 1.2rem; }
+    .article-row .share-btn {
+      position: static;
+      opacity: 1;
+      width: 40px; height: 40px;
+      align-self: center;
+      flex-shrink: 0;
+    }
+
+    /* ── FEATURED WIDE ── */
+    .feature-wide {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 2px solid var(--ink);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      transition: box-shadow 0.25s, background 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+    }
+    .feature-wide:hover { box-shadow: 8px 8px 0 var(--shadow-color); }
+    .feature-wide .fw-thumb {
+      min-height: 320px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem;
+      border-right: 2px solid var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-wide .fw-body {
+      padding: 2.5rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .fw-body .card-tag { align-self: flex-start; }
+    .fw-body h2 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 1rem;
+    }
+    .fw-body p { font-size: 1rem; line-height: 1.7; color: var(--muted); margin-bottom: 1.5rem; }
+    .fw-body .card-footer { border-top: none; padding-top: 0; }
+
+    /* ── CATEGORIES STRIP ── */
+    .cat-strip {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      padding: 0 4vw;
+      margin-bottom: 3rem;
+    }
+    .cat-pill {
+      border: 2px solid var(--ink);
+      border-radius: 100px;
+      padding: 0.5rem 1.2rem;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+      background: transparent;
+      color: var(--ink);
+    }
+    .cat-pill:hover, .cat-pill.active {
+      background: var(--ink);
+      color: var(--cream);
+    }
+    .cat-pill .cat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── CATEGORY PAGE OVERLAY ── */
+    .cat-page {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--cream);
+      overflow-y: auto;
+      animation: slideUp 0.4s ease both;
+    }
+    .cat-page.active { display: block; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .cat-page-header {
+      padding: 1.5rem 4vw;
+      border-bottom: 2px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--cream);
+      z-index: 10;
+    }
+    .cat-page-back {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 2px solid var(--ink);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--ink);
+    }
+    .cat-page-back:hover { background: var(--ink); color: var(--cream); }
+    .cat-page-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+    .cat-hero-banner {
+      padding: 3rem 4vw 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      border-bottom: 2px solid var(--ink);
+    }
+    .cat-hero-icon {
+      width: 100px; height: 100px;
+      border-radius: 24px;
+      border: 3px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      flex-shrink: 0;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+    .cat-hero-text h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+    }
+    .cat-hero-text p { color: #555; font-size: 1rem; line-height: 1.6; max-width: 500px; }
+    .cat-articles {
+      padding: 2.5rem 4vw 4rem;
+    }
+    .article-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px dashed var(--border-soft);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s;
+    }
+    .article-row:hover { transform: translateX(6px); }
+    .article-row:last-child { border-bottom: none; }
+    .article-num {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      opacity: 0.15;
+      width: 48px;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 4px;
+    }
+    .article-thumb {
+      width: 80px; height: 80px;
+      border-radius: 14px;
+      border: 2px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+    .article-info { flex: 1; }
+    .article-info .a-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      border: 2px solid var(--ink);
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+    .article-info h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.35rem;
+    }
+    .article-info p { font-size: 0.85rem; color: var(--muted-2); line-height: 1.5; margin-bottom: 0.6rem; }
+    .article-meta { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--muted-2); font-weight: 600; }
+    .article-link-btn {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      font-size: 1rem;
+      transition: all 0.2s;
+      align-self: center;
+      color: var(--ink);
+    }
+    .article-row:hover .article-link-btn {
+      background: var(--ink);
+      color: var(--cream);
+    }
+
+    /* ── NEWSLETTER ── */
+    .newsletter {
+      margin: 0 4vw 4rem;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 28px;
+      padding: 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .newsletter-bg {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: var(--coral);
+      opacity: 0.15;
+      bottom: -150px; right: -100px;
+      pointer-events: none;
+    }
+    .newsletter h2 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 0.8rem;
+    }
+    .newsletter h2 em { font-style: italic; color: var(--yellow); }
+    .newsletter p { font-size: 1rem; opacity: 0.75; line-height: 1.6; }
+    .nl-form { display: flex; flex-direction: column; gap: 1rem; }
+    .nl-form input {
+      width: 100%;
+      padding: 1rem 1.3rem;
+      border-radius: 100px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .nl-form input::placeholder { opacity: 0.5; color: var(--cream); }
+    .nl-form input:focus { border-color: var(--yellow); }
+    .nl-form button {
+      padding: 1rem 2rem;
+      border-radius: 100px;
+      border: none;
+      background: var(--yellow);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nl-form button:hover { background: var(--coral); color: #fff; }
+    .nl-note { font-size: 0.78rem; opacity: 0.5; text-align: center; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 2px solid var(--ink);
+      padding: 2.5rem 4vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer .logo { font-size: 1.4rem; }
+    .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+    .footer-links a { text-decoration: none; color: var(--muted); font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--coral); }
+    .footer-copy { font-size: 0.78rem; color: var(--muted-2); }
+
+    /* ── COMMENTS ── */
+    .comment-form-box {
+      background: var(--card-bg);
+      border: 2px solid var(--ink);
+      border-radius: var(--card-radius);
+      padding: 2rem;
+      box-shadow: 6px 6px 0 var(--shadow-color);
+      transition: background 0.3s ease;
+    }
+    .comment-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .c-input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 2px solid var(--border-soft);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--cream);
+      color: var(--ink);
+    }
+    .c-input:focus { border-color: var(--coral); }
+    .c-textarea { resize: vertical; min-height: 110px; }
+    .comment-item {
+      background: var(--card-bg);
+      border: 2px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 1.2rem 1.4rem;
+      transition: border-color 0.2s, background 0.3s ease;
+    }
+    .comment-item:hover { border-color: var(--lavender); }
+    .comment-header {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem;
+    }
+    .comment-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--lavender);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; color: #fff;
+      border: 2px solid var(--ink); flex-shrink: 0;
+    }
+    .comment-time { display: block; font-size: 0.75rem; color: var(--muted-2); margin-top: 1px; }
+    .comment-text { font-size: 0.95rem; line-height: 1.6; color: var(--muted); }
+
+    /* ── SHARE MENU ── */
+    .share-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--card-bg);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 5px 5px 0 var(--shadow-color);
+      padding: 0.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-width: 180px;
+      z-index: 50;
+    }
+    .share-menu.active { display: flex; }
+    .share-menu button, .share-menu a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.55rem 0.7rem;
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .share-menu button:hover, .share-menu a:hover { background: rgba(167,139,250,0.15); }
+    .share-menu .sm-icon { font-size: 1.05rem; width: 20px; text-align: center; flex-shrink: 0; }
+    .share-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--cream);
+      padding: 0.7rem 1.4rem;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 4px 4px 0 var(--coral);
+      z-index: 400;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .share-toast.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.7s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.35s; }
+    .delay-4 { animation-delay: 0.5s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding-top: 2rem; min-height: unset; }
+      .hero-visual { display: none; }
+      .feature-wide { grid-template-columns: 1fr; }
+      .feature-wide .fw-thumb { border-right: none; border-bottom: 2px solid var(--ink); min-height: 200px; }
+      .newsletter { grid-template-columns: 1fr; padding: 2.5rem; }
+      .nav-links { display: none; }
+      .article-row { flex-wrap: wrap; }
+      .article-num { display: none; }
+      .cat-hero-banner { flex-direction: column; text-align: center; align-items: flex-start; }
+    }
+    @media (max-width: 600px) {
+      .comment-form-grid { grid-template-columns: 1fr; }
+      .search-overlay { padding: 4vh 4vw 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" onclick="showHome()">ZE<span>ST</span></a>
+  <ul class="nav-links">
+    <li><a onclick="openCategory('culture')">Culture</a></li>
+    <li><a onclick="openCategory('design')">Design</a></li>
+    <li><a onclick="openCategory('tech')">Tech</a></li>
+    <li><a onclick="openCategory('travel')">Travel</a></li>
+    <li><a href="#newsletter" class="nav-cta">Subscribe</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="icon-btn" id="search-toggle" onclick="openSearch()" aria-label="Search articles" title="Search">🔍</button>
+    <button class="icon-btn theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <span class="icon-sun">☀️</span>
+      <span class="icon-moon">🌙</span>
+    </button>
+  </div>
+</nav>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-panel">
+    <div class="search-input-row">
+      <span class="icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search articles, topics, authors..." autocomplete="off"/>
+      <button class="search-close" onclick="closeSearch()">Esc</button>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-hint">Start typing to search across every ZEST story ✦</div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE TOAST -->
+<div class="share-toast" id="share-toast">Link copied to clipboard ✦</div>
+
+<!-- ════════════ MAIN HOME ════════════ -->
+<div id="home-page">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-blob"></div>
+  <div class="hero-left">
+    <p class="hero-eyebrow fade-up">Fresh Ideas, Every Day</p>
+    <h1 class="hero-title fade-up delay-1">
+      Stories that<br>
+      <em>spark</em> your<br>
+      <span class="underline-squiggle">curiosity</span>
+    </h1>
+    <p class="hero-desc fade-up delay-2">
+      ZEST is a creative magazine for the endlessly curious — exploring design, culture, tech, and the weird beautiful overlap between all three.
+    </p>
+    <div class="hero-actions fade-up delay-3">
+      <button class="btn-primary" onclick="document.getElementById('latest').scrollIntoView({behavior:'smooth'})">Explore Stories →</button>
+      <a href="#newsletter" class="btn-outline">Subscribe Free</a>
+    </div>
+  </div>
+
+  <div class="hero-visual fade-up delay-4">
+    <span class="floating-pill pill-1">🎨 New: Design Issue</span>
+    <div class="hero-card-main">
+      <div class="card-img"><img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=960&h=520&fit=crop&auto=format" alt="Colorful sunrise over mountains"/></div>
+      <div class="card-body">
+        <span class="tag">Editor's Pick</span>
+        <h3>The Joy of Making Things Nobody Asked For</h3>
+        <p>Why the best creative work often starts with zero expectations.</p>
+        <div class="hero-meta">
+          <div class="hero-avatar">ML</div>
+          <span>Maya Lin · 5 min read</span>
+        </div>
+      </div>
+    </div>
+    <span class="floating-pill pill-2">✦ 12k readers this week</span>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="dot"></span>Design Thinking</span>
+    <span class="ticker-item"><span class="dot"></span>Street Photography</span>
+    <span class="ticker-item"><span class="dot"></span>Future of Work</span>
+    <span class="ticker-item"><span class="dot"></span>Digital Nomads</span>
+    <span class="ticker-item"><span class="dot"></span>Slow Travel</span>
+    <span class="ticker-item"><span class="dot"></span>Creative Burnout</span>
+    <span class="ticker-item"><span class="dot"></span>Color Theory</span>
+    <span class="ticker-item"><span class="dot"></span>Urban Foraging</span>
+    <span class="ticker-item"><span class="dot"></span>Design Thinking</span>
+    <span class="ticker-item"><span class="dot"></span>Street Photography</span>
+    <span class="ticker-item"><span class="dot"></span>Future of Work</span>
+    <span class="ticker-item"><span class="dot"></span>Digital Nomads</span>
+    <span class="ticker-item"><span class="dot"></span>Slow Travel</span>
+    <span class="ticker-item"><span class="dot"></span>Creative Burnout</span>
+    <span class="ticker-item"><span class="dot"></span>Color Theory</span>
+    <span class="ticker-item"><span class="dot"></span>Urban Foraging</span>
+  </div>
+</div>
+
+<!-- CATEGORY PILLS -->
+<div class="cat-strip" style="margin-top: 3rem;">
+  <button class="cat-pill active" onclick="filterCards('all', this)">
+    <span class="cat-dot" style="background:var(--coral)"></span> All
+  </button>
+  <button class="cat-pill" onclick="openCategory('design')">
+    <span class="cat-dot" style="background:var(--lavender)"></span> Design
+  </button>
+  <button class="cat-pill" onclick="openCategory('culture')">
+    <span class="cat-dot" style="background:var(--mint)"></span> Culture
+  </button>
+  <button class="cat-pill" onclick="openCategory('tech')">
+    <span class="cat-dot" style="background:var(--sky)"></span> Tech
+  </button>
+  <button class="cat-pill" onclick="openCategory('travel')">
+    <span class="cat-dot" style="background:var(--yellow)"></span> Travel
+  </button>
+</div>
+
+<!-- FEATURED WIDE -->
+<div class="section" id="latest" style="padding-top: 0;">
+  <div class="section-header">
+    <h2 class="section-title">Featured <span>this week</span></h2>
+    <a href="#" class="see-all">See all →</a>
+  </div>
+
+  <a href="https://www.bloomberg.com/news/articles/2024-01-09/15-minute-cities-what-works-what-doesn-t" target="_blank" class="feature-wide" data-share-title="How Cities Are Quietly Redesigning Themselves Around People (Not Cars)" data-share-url="https://www.bloomberg.com/news/articles/2024-01-09/15-minute-cities-what-works-what-doesn-t">
+    <div class="fw-thumb" style="background: linear-gradient(135deg, #A78BFA22, #74C0FC22);">
+      <div class="bg-shape" style="background: var(--lavender); top: -40px; left: -40px; position:absolute;width:150px;height:150px;border-radius:50%;opacity:0.3;"></div>
+      <span style="position:relative;z-index:1;font-size:7rem;">🏙️</span>
+    </div>
+    <div class="fw-body">
+      <span class="card-tag" style="background: #A78BFA22; border-color: var(--lavender);">✦ Culture</span>
+      <h2>How Cities Are Quietly Redesigning Themselves Around People (Not Cars)</h2>
+      <p>A decade after the first "15-minute city" experiments, we look at what actually worked, what failed, and why it matters more than ever.</p>
+      <div class="card-footer">
+        <div class="card-author">
+          <div class="author-dot" style="background: #A78BFA33;">JK</div>
+          <span>Jess Kim</span>
+        </div>
+        <span class="read-time">8 min read</span>
+      </div>
+    </div>
+    <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+  </a>
+</div>
+
+<!-- CARD GRID -->
+<section class="section" style="padding-top: 0;" id="cards-section">
+  <div class="cards-grid" id="cards-grid">
+
+    <a href="https://fonts.google.com/knowledge/introducing_type/a_brief_history_of_type" target="_blank" class="card" data-cat="design" data-share-title="The Typography Trends Nobody Is Talking About" data-share-url="https://fonts.google.com/knowledge/introducing_type/a_brief_history_of_type">
+      <div class="card-thumb" style="background: #A78BFA18;">
+        <img src="https://images.unsplash.com/photo-1586717799252-bd134ad00e26?w=600&h=400&fit=crop&auto=format" alt="Typography"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #A78BFA18; border-color: var(--lavender);">Design</span>
+        <h3 class="card-title">The Typography Trends Nobody Is Talking About</h3>
+        <p class="card-excerpt">Variable fonts, optical sizing, and the quiet revolution happening in web type that's changing everything about how we read.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#A78BFA33;">AR</div><span>Ana Reyes</span></div>
+          <span class="read-time">4 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+    <a href="https://www.technologyreview.com/2024/02/06/1087606/small-ai-models/" target="_blank" class="card" data-cat="tech" data-share-title="Tiny AI Models Are Having a Moment — Here's Why" data-share-url="https://www.technologyreview.com/2024/02/06/1087606/small-ai-models/">
+      <div class="card-thumb" style="background: #74C0FC18;">
+        <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&h=400&fit=crop&auto=format" alt="AI"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #74C0FC18; border-color: var(--sky);">Tech</span>
+        <h3 class="card-title">Tiny AI Models Are Having a Moment — Here's Why</h3>
+        <p class="card-excerpt">The race to build the biggest AI model is cooling off. Now the most interesting work is happening at the small end of the scale.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#74C0FC33;">TP</div><span>Tom Park</span></div>
+          <span class="read-time">6 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+    <a href="https://www.theguardian.com/travel/2023/sep/16/slow-train-travel-europe-interrail" target="_blank" class="card" data-cat="travel" data-share-title="Slow Train, Fast Connections: Crossing Europe Without a Deadline" data-share-url="https://www.theguardian.com/travel/2023/sep/16/slow-train-travel-europe-interrail">
+      <div class="card-thumb" style="background: #FFD93D18;">
+        <img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=400&fit=crop&auto=format" alt="Train travel"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #FFD93D18; border-color: var(--yellow); color: #a07700;">Travel</span>
+        <h3 class="card-title">Slow Train, Fast Connections: Crossing Europe Without a Deadline</h3>
+        <p class="card-excerpt">When a missed flight turned into a month-long rail adventure, I discovered the country I thought I already knew.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#FFD93D44;">LM</div><span>Lena M.</span></div>
+          <span class="read-time">7 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+    <a href="https://pitchfork.com/features/article/the-vinyl-revival/" target="_blank" class="card" data-cat="culture" data-share-title="The Underground Vinyl Scene Keeping Record Stores Alive" data-share-url="https://pitchfork.com/features/article/the-vinyl-revival/">
+      <div class="card-thumb" style="background: #6BCB7718;">
+        <img src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=600&h=400&fit=crop&auto=format" alt="Vinyl records"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #6BCB7718; border-color: var(--mint);">Culture</span>
+        <h3 class="card-title">The Underground Vinyl Scene Keeping Record Stores Alive</h3>
+        <p class="card-excerpt">In the age of streaming, independent record shops are doing something no algorithm can replicate: building real community.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#6BCB7733;">DO</div><span>Dan Osei</span></div>
+          <span class="read-time">5 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+    <a href="https://www.citylab.com/design/2019/10/ugly-buildings-cities-architecture-preservation/599563/" target="_blank" class="card" data-cat="design" data-share-title="Why Ugly Buildings Are Actually Good for Cities" data-share-url="https://www.citylab.com/design/2019/10/ugly-buildings-cities-architecture-preservation/599563/">
+      <div class="card-thumb" style="background: #FF6B6B18;">
+        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=400&fit=crop&auto=format" alt="Architecture"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #FF6B6B18; border-color: var(--coral);">Design</span>
+        <h3 class="card-title">Why Ugly Buildings Are Actually Good for Cities</h3>
+        <p class="card-excerpt">Beauty in architecture is a moving target — and the buildings we mock today often become the ones we mourn later.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#FF6B6B33;">PW</div><span>Priya W.</span></div>
+          <span class="read-time">5 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+    <a href="https://www.wired.com/story/solid-state-battery-revolution/" target="_blank" class="card" data-cat="tech" data-share-title="The Battery Revolution Is Already Here — Just Unevenly Distributed" data-share-url="https://www.wired.com/story/solid-state-battery-revolution/">
+      <div class="card-thumb" style="background: #74C0FC18;">
+        <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600&h=400&fit=crop&auto=format" alt="Battery technology"/>
+      </div>
+      <div class="card-content">
+        <span class="card-tag" style="background: #74C0FC18; border-color: var(--sky);">Tech</span>
+        <h3 class="card-title">The Battery Revolution Is Already Here — Just Unevenly Distributed</h3>
+        <p class="card-excerpt">Solid-state cells, sodium-ion tech, and the messy geopolitics of who gets the energy transition first.</p>
+        <div class="card-footer">
+          <div class="card-author"><div class="author-dot" style="background:#74C0FC33;">RL</div><span>Rosa Liu</span></div>
+          <span class="read-time">9 min</span>
+        </div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+    </a>
+
+  </div>
+</section>
+
+<!-- COMMENTS SECTION -->
+<section class="section" style="padding-bottom: 0;">
+  <div class="section-header">
+    <h2 class="section-title">Join the <span>Conversation</span></h2>
+    <span id="comment-count" style="font-weight:700; color:var(--muted-2); font-size:0.9rem;">Loading...</span>
+  </div>
+
+  <div class="comment-form-box">
+    <h3 style="font-family:'Fraunces',serif; font-size:1.3rem; margin-bottom:1.2rem;">Write your comment ✍️</h3>
+    <div class="comment-form-grid">
+      <input type="text"  id="c-name"    placeholder="Your name" class="c-input" maxlength="100"/>
+      <input type="email" id="c-email"   placeholder="Email (won't be shown)" class="c-input" maxlength="254"/>
+    </div>
+    <textarea id="c-message" placeholder="What are you thinking? Write it all..." class="c-input c-textarea" maxlength="2000"></textarea>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; flex-wrap:wrap; gap:0.5rem;">
+      <button id="c-submit" class="btn-primary" onclick="submitComment()">Post Comment ✦</button>
+      <span id="char-count" style="font-size:0.8rem; color:var(--muted-2);">0 / 2000</span>
+    </div>
+  </div>
+
+  <div id="comments-list" style="margin-top: 2.5rem; display:flex; flex-direction:column; gap:1.2rem;">
+    <p style="color:var(--muted-2);font-size:0.9rem;">Loading comments...</p>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter" id="newsletter">
+  <div class="newsletter-bg"></div>
+  <div>
+    <h2>Get the good stuff <em>in your inbox</em></h2>
+    <p>Every Sunday morning, we send one beautifully curated read — no noise, no spam. Just the story of the week.</p>
+  </div>
+  <div class="nl-form">
+    <input type="email" placeholder="your@email.com" id="nl-email" maxlength="254"/>
+    <button onclick="subscribeNewsletter()">Subscribe — it's free ✦</button>
+    <p class="nl-note">Join 24,000+ curious readers. Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a class="logo" onclick="showHome()">ZE<span>ST</span></a>
+  <ul class="footer-links">
+    <li><a href="#">About</a></li>
+    <li><a href="#">Write for Us</a></li>
+    <li><a href="#">Advertise</a></li>
+    <li><a href="#">Privacy</a></li>
+  </ul>
+  <p class="footer-copy">© 2026 ZEST Magazine. Made with ✦</p>
+  <p class="footer-copy" style="width:100%; text-align:center; margin-top:0.8rem; font-size:0.82rem; color:var(--muted-2);">
+    Designed with <span style="color:var(--coral);">♥</span> by <strong style="color:var(--ink); font-weight:700;">Bulbul Bhilala</strong>
+  </p>
+</footer>
+
+</div><!-- /home-page -->
+
+
+<!-- ════════════ CATEGORY PAGES ════════════ -->
+
+<!-- DESIGN PAGE -->
+<div id="page-design" class="cat-page">
+  <div class="cat-page-header">
+    <button class="cat-page-back" onclick="closeCategoryPage()">← Back</button>
+    <span class="cat-page-title">Design</span>
+    <span style="font-size:0.8rem;color:#999;">6 articles</span>
+  </div>
+  <div class="cat-hero-banner" style="background:#1A1A2E; padding:0; position:relative; overflow:hidden; min-height:260px; align-items:stretch;">
+    <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&h=400&fit=crop&auto=format" alt="Design" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;"/>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:2rem;padding:3rem 4vw;width:100%;">
+      <div class="cat-hero-icon" style="background:rgba(167,139,250,0.25);border-color:var(--lavender);backdrop-filter:blur(8px);">🎨</div>
+      <div class="cat-hero-text">
+        <h1 style="color:#fff;">Design</h1>
+        <p style="color:rgba(255,255,255,0.75);">Visual thinking, typography, architecture, and everything that shapes how we experience the world around us.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cat-articles">
+    <a href="https://fonts.google.com/knowledge/introducing_type/a_brief_history_of_type" target="_blank" class="article-row" data-share-title="The Typography Trends Nobody Is Talking About" data-share-url="https://fonts.google.com/knowledge/introducing_type/a_brief_history_of_type">
+      <span class="article-num">01</span>
+      <div class="article-thumb" style="background:#A78BFA18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1586717799252-bd134ad00e26?w=160&h=160&fit=crop&auto=format" alt="Typography" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#A78BFA18; border-color:var(--lavender);">Typography</span>
+        <h3>The Typography Trends Nobody Is Talking About</h3>
+        <p>Variable fonts, optical sizing, and the quiet revolution happening in web type that's changing everything about how we read online.</p>
+        <div class="article-meta"><span>Ana Reyes</span><span>4 min read</span><span>Google Fonts</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.citylab.com/design/2019/10/ugly-buildings-cities-architecture-preservation/599563/" target="_blank" class="article-row" data-share-title="Why Ugly Buildings Are Actually Good for Cities" data-share-url="https://www.citylab.com/design/2019/10/ugly-buildings-cities-architecture-preservation/599563/">
+      <span class="article-num">02</span>
+      <div class="article-thumb" style="background:#FF6B6B18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=160&h=160&fit=crop&auto=format" alt="Architecture" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FF6B6B18; border-color:var(--coral);">Architecture</span>
+        <h3>Why Ugly Buildings Are Actually Good for Cities</h3>
+        <p>Beauty in architecture is a moving target — and the buildings we mock today often become the ones we mourn later.</p>
+        <div class="article-meta"><span>Priya W.</span><span>5 min read</span><span>CityLab</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://uxdesign.cc/design-systems-102-grid-systems-for-screen-design-3bb40e13a786" target="_blank" class="article-row" data-share-title="Grid Systems for Screen Design: The Complete Guide" data-share-url="https://uxdesign.cc/design-systems-102-grid-systems-for-screen-design-3bb40e13a786">
+      <span class="article-num">03</span>
+      <div class="article-thumb" style="background:#A78BFA18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1558655146-d09347e92766?w=160&h=160&fit=crop&auto=format" alt="Grid design" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#A78BFA18; border-color:var(--lavender);">UX Design</span>
+        <h3>Grid Systems for Screen Design: The Complete Guide</h3>
+        <p>How to use grids, columns, and spacing to create layouts that feel natural — not mechanical.</p>
+        <div class="article-meta"><span>UX Collective</span><span>7 min read</span><span>UXDesign.cc</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.smashingmagazine.com/2023/02/guide-accessible-color-vision-deficiencies/" target="_blank" class="article-row" data-share-title="A Complete Guide to Accessible Color Design" data-share-url="https://www.smashingmagazine.com/2023/02/guide-accessible-color-vision-deficiencies/">
+      <span class="article-num">04</span>
+      <div class="article-thumb" style="background:#FFD93D18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1523821741446-edb2b68bb7a0?w=160&h=160&fit=crop&auto=format" alt="Color palette" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FFD93D18; border-color:var(--yellow);">Color</span>
+        <h3>A Complete Guide to Accessible Color Design</h3>
+        <p>Designing for color vision deficiencies — practical tools and techniques every designer should know.</p>
+        <div class="article-meta"><span>Smashing Magazine</span><span>9 min read</span><span>SmashingMag</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.designboom.com/design/dieter-rams-ten-principles-for-good-design/" target="_blank" class="article-row" data-share-title="Dieter Rams' Ten Principles for Good Design — Still Relevant Today" data-share-url="https://www.designboom.com/design/dieter-rams-ten-principles-for-good-design/">
+      <span class="article-num">05</span>
+      <div class="article-thumb" style="background:#6BCB7718;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1541558869434-2840d308329a?w=160&h=160&fit=crop&auto=format" alt="Product design" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#6BCB7718; border-color:var(--mint);">Product Design</span>
+        <h3>Dieter Rams' Ten Principles for Good Design — Still Relevant Today</h3>
+        <p>Revisiting the legendary designer's framework that shaped Apple, Braun, and the entire field of industrial design.</p>
+        <div class="article-meta"><span>Designboom</span><span>6 min read</span><span>Designboom</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://css-tricks.com/the-art-of-ui-skeletons/" target="_blank" class="article-row" data-share-title="The Art of UI Skeletons: Loading States Done Right" data-share-url="https://css-tricks.com/the-art-of-ui-skeletons/">
+      <span class="article-num">06</span>
+      <div class="article-thumb" style="background:#74C0FC18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=160&h=160&fit=crop&auto=format" alt="UI design" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#74C0FC18; border-color:var(--sky);">UI Design</span>
+        <h3>The Art of UI Skeletons: Loading States Done Right</h3>
+        <p>How skeleton screens improve perceived performance and what makes them feel satisfying instead of annoying.</p>
+        <div class="article-meta"><span>CSS-Tricks</span><span>5 min read</span><span>CSS-Tricks</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+  </div>
+</div>
+
+<!-- CULTURE PAGE -->
+<div id="page-culture" class="cat-page">
+  <div class="cat-page-header">
+    <button class="cat-page-back" onclick="closeCategoryPage()">← Back</button>
+    <span class="cat-page-title">Culture</span>
+    <span style="font-size:0.8rem;color:#999;">6 articles</span>
+  </div>
+  <div class="cat-hero-banner" style="background:#1A1A2E; padding:0; position:relative; overflow:hidden; min-height:260px; align-items:stretch;">
+    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&h=400&fit=crop&auto=format" alt="Culture" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;"/>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:2rem;padding:3rem 4vw;width:100%;">
+      <div class="cat-hero-icon" style="background:rgba(107,203,119,0.25);border-color:var(--mint);backdrop-filter:blur(8px);">🎭</div>
+      <div class="cat-hero-text">
+        <h1 style="color:#fff;">Culture</h1>
+        <p style="color:rgba(255,255,255,0.75);">Music, cities, people, food, and the everyday forces quietly shaping how we live, think, and connect.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cat-articles">
+    <a href="https://pitchfork.com/features/article/the-vinyl-revival/" target="_blank" class="article-row" data-share-title="The Underground Vinyl Scene Keeping Record Stores Alive" data-share-url="https://pitchfork.com/features/article/the-vinyl-revival/">
+      <span class="article-num">01</span>
+      <div class="article-thumb" style="background:#6BCB7718;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=160&h=160&fit=crop&auto=format" alt="Vinyl records" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#6BCB7718; border-color:var(--mint);">Music</span>
+        <h3>The Underground Vinyl Scene Keeping Record Stores Alive</h3>
+        <p>In the age of streaming, independent record shops are doing something no algorithm can replicate: building real community.</p>
+        <div class="article-meta"><span>Dan Osei</span><span>5 min read</span><span>Pitchfork</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.bloomberg.com/news/articles/2024-01-09/15-minute-cities-what-works-what-doesn-t" target="_blank" class="article-row" data-share-title="How Cities Are Quietly Redesigning Themselves Around People" data-share-url="https://www.bloomberg.com/news/articles/2024-01-09/15-minute-cities-what-works-what-doesn-t">
+      <span class="article-num">02</span>
+      <div class="article-thumb" style="background:#A78BFA18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=160&h=160&fit=crop&auto=format" alt="City streets" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#A78BFA18; border-color:var(--lavender);">Cities</span>
+        <h3>How Cities Are Quietly Redesigning Themselves Around People</h3>
+        <p>A decade after the first "15-minute city" experiments, what actually worked, what failed, and why it matters more than ever.</p>
+        <div class="article-meta"><span>Jess Kim</span><span>8 min read</span><span>Bloomberg</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.newyorker.com/culture/cultural-comment/the-rise-of-the-food-memoir" target="_blank" class="article-row" data-share-title="The Rise of the Food Memoir: Why We Can't Stop Reading About Eating" data-share-url="https://www.newyorker.com/culture/cultural-comment/the-rise-of-the-food-memoir">
+      <span class="article-num">03</span>
+      <div class="article-thumb" style="background:#FF6B6B18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=160&h=160&fit=crop&auto=format" alt="Food" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FF6B6B18; border-color:var(--coral);">Food</span>
+        <h3>The Rise of the Food Memoir: Why We Can't Stop Reading About Eating</h3>
+        <p>From kitchen memoirs to culinary fiction — food writing has evolved into a lens for exploring identity, grief, and belonging.</p>
+        <div class="article-meta"><span>The New Yorker</span><span>10 min read</span><span>NewYorker</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.theguardian.com/film/2024/jan/15/how-bollywood-went-global" target="_blank" class="article-row" data-share-title="How Bollywood Went Global (And What Got Lost in Translation)" data-share-url="https://www.theguardian.com/film/2024/jan/15/how-bollywood-went-global">
+      <span class="article-num">04</span>
+      <div class="article-thumb" style="background:#FFD93D18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=160&h=160&fit=crop&auto=format" alt="Cinema" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FFD93D18; border-color:var(--yellow);">Film</span>
+        <h3>How Bollywood Went Global (And What Got Lost in Translation)</h3>
+        <p>Indian cinema is bigger worldwide than ever before — but the journey from Mumbai to global streaming wasn't without sacrifice.</p>
+        <div class="article-meta"><span>The Guardian</span><span>7 min read</span><span>Guardian</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.vox.com/culture/2023/9/6/23861330/internet-nostalgia-aughts-y2k-aesthetic" target="_blank" class="article-row" data-share-title="Why We Can't Stop Nostalgic-Posting About the 2000s Internet" data-share-url="https://www.vox.com/culture/2023/9/6/23861330/internet-nostalgia-aughts-y2k-aesthetic">
+      <span class="article-num">05</span>
+      <div class="article-thumb" style="background:#74C0FC18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=160&h=160&fit=crop&auto=format" alt="Retro tech" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#74C0FC18; border-color:var(--sky);">Internet</span>
+        <h3>Why We Can't Stop Nostalgic-Posting About the 2000s Internet</h3>
+        <p>Y2K aesthetic, early MySpace profiles, and the strange grief of mourning a digital era that never really died.</p>
+        <div class="article-meta"><span>Vox</span><span>6 min read</span><span>Vox</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://lithub.com/on-the-persistence-of-independent-bookstores/" target="_blank" class="article-row" data-share-title="Independent Bookstores Won't Die — Here's Why" data-share-url="https://lithub.com/on-the-persistence-of-independent-bookstores/">
+      <span class="article-num">06</span>
+      <div class="article-thumb" style="background:#6BCB7718;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=160&h=160&fit=crop&auto=format" alt="Bookstore" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#6BCB7718; border-color:var(--mint);">Books</span>
+        <h3>Independent Bookstores Won't Die — Here's Why</h3>
+        <p>Against all odds, indie bookshops are thriving. The reason has less to do with books and more to do with third places.</p>
+        <div class="article-meta"><span>Lit Hub</span><span>5 min read</span><span>LitHub</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+  </div>
+</div>
+
+<!-- TECH PAGE -->
+<div id="page-tech" class="cat-page">
+  <div class="cat-page-header">
+    <button class="cat-page-back" onclick="closeCategoryPage()">← Back</button>
+    <span class="cat-page-title">Tech</span>
+    <span style="font-size:0.8rem;color:#999;">6 articles</span>
+  </div>
+  <div class="cat-hero-banner" style="background:#1A1A2E; padding:0; position:relative; overflow:hidden; min-height:260px; align-items:stretch;">
+    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=400&fit=crop&auto=format" alt="Tech" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.4;"/>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:2rem;padding:3rem 4vw;width:100%;">
+      <div class="cat-hero-icon" style="background:rgba(116,192,252,0.25);border-color:var(--sky);backdrop-filter:blur(8px);">⚡</div>
+      <div class="cat-hero-text">
+        <h1 style="color:#fff;">Tech</h1>
+        <p style="color:rgba(255,255,255,0.75);">AI, batteries, startups, and the technologies quietly rewriting the rules of how we work, connect, and exist.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cat-articles">
+    <a href="https://www.technologyreview.com/2024/02/06/1087606/small-ai-models/" target="_blank" class="article-row" data-share-title="Tiny AI Models Are Having a Moment — Here's Why" data-share-url="https://www.technologyreview.com/2024/02/06/1087606/small-ai-models/">
+      <span class="article-num">01</span>
+      <div class="article-thumb" style="background:#74C0FC18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=160&h=160&fit=crop&auto=format" alt="AI" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#74C0FC18; border-color:var(--sky);">AI</span>
+        <h3>Tiny AI Models Are Having a Moment — Here's Why</h3>
+        <p>The race to build the biggest AI model is cooling off. Now the most interesting work is happening at the small end of the scale.</p>
+        <div class="article-meta"><span>Tom Park</span><span>6 min read</span><span>MIT Tech Review</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.wired.com/story/solid-state-battery-revolution/" target="_blank" class="article-row" data-share-title="The Battery Revolution Is Already Here — Just Unevenly Distributed" data-share-url="https://www.wired.com/story/solid-state-battery-revolution/">
+      <span class="article-num">02</span>
+      <div class="article-thumb" style="background:#74C0FC18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=160&h=160&fit=crop&auto=format" alt="Battery tech" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#74C0FC18; border-color:var(--sky);">Energy</span>
+        <h3>The Battery Revolution Is Already Here — Just Unevenly Distributed</h3>
+        <p>Solid-state cells, sodium-ion tech, and the messy geopolitics of who gets the energy transition first.</p>
+        <div class="article-meta"><span>Rosa Liu</span><span>9 min read</span><span>WIRED</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.theverge.com/2024/1/8/24027267/open-source-ai-llama-mistral-2024" target="_blank" class="article-row" data-share-title="Open-Source AI Is Winning — And Big Tech Is Nervous" data-share-url="https://www.theverge.com/2024/1/8/24027267/open-source-ai-llama-mistral-2024">
+      <span class="article-num">03</span>
+      <div class="article-thumb" style="background:#A78BFA18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=160&h=160&fit=crop&auto=format" alt="Open source code" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#A78BFA18; border-color:var(--lavender);">Open Source</span>
+        <h3>Open-Source AI Is Winning — And Big Tech Is Nervous</h3>
+        <p>LLaMA, Mistral, and the growing ecosystem of free models that are challenging proprietary AI's grip on the industry.</p>
+        <div class="article-meta"><span>The Verge</span><span>8 min read</span><span>TheVerge</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://spectrum.ieee.org/quantum-computing-progress-2024" target="_blank" class="article-row" data-share-title="Quantum Computing's Awkward Teenage Years" data-share-url="https://spectrum.ieee.org/quantum-computing-progress-2024">
+      <span class="article-num">04</span>
+      <div class="article-thumb" style="background:#6BCB7718;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=160&h=160&fit=crop&auto=format" alt="Quantum computing" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#6BCB7718; border-color:var(--mint);">Quantum</span>
+        <h3>Quantum Computing's Awkward Teenage Years</h3>
+        <p>It's been "five years away from maturity" for three decades. So where exactly does quantum computing stand in 2025?</p>
+        <div class="article-meta"><span>IEEE Spectrum</span><span>11 min read</span><span>IEEE</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.fastcompany.com/90993849/apple-vision-pro-spatial-computing" target="_blank" class="article-row" data-share-title="Spatial Computing: Is This Actually the Future or Just Expensive VR?" data-share-url="https://www.fastcompany.com/90993849/apple-vision-pro-spatial-computing">
+      <span class="article-num">05</span>
+      <div class="article-thumb" style="background:#FF6B6B18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=160&h=160&fit=crop&auto=format" alt="VR headset" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FF6B6B18; border-color:var(--coral);">Spatial</span>
+        <h3>Spatial Computing: Is This Actually the Future or Just Expensive VR?</h3>
+        <p>One year after Apple Vision Pro launched, we examine whether spatial computing has lived up to its hype — and what's next.</p>
+        <div class="article-meta"><span>Fast Company</span><span>7 min read</span><span>FastCompany</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://techcrunch.com/2024/03/12/the-rise-of-developer-tools/" target="_blank" class="article-row" data-share-title="Why Developer Tools Are the Hottest Space in Tech Right Now" data-share-url="https://techcrunch.com/2024/03/12/the-rise-of-developer-tools/">
+      <span class="article-num">06</span>
+      <div class="article-thumb" style="background:#FFD93D18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=160&h=160&fit=crop&auto=format" alt="Developer coding" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FFD93D18; border-color:var(--yellow);">Dev Tools</span>
+        <h3>Why Developer Tools Are the Hottest Space in Tech Right Now</h3>
+        <p>From AI coding assistants to no-code platforms — the explosion in tools to build things has never been bigger or weirder.</p>
+        <div class="article-meta"><span>TechCrunch</span><span>5 min read</span><span>TechCrunch</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+  </div>
+</div>
+
+<!-- TRAVEL PAGE -->
+<div id="page-travel" class="cat-page">
+  <div class="cat-page-header">
+    <button class="cat-page-back" onclick="closeCategoryPage()">← Back</button>
+    <span class="cat-page-title">Travel</span>
+    <span style="font-size:0.8rem;color:#999;">6 articles</span>
+  </div>
+  <div class="cat-hero-banner" style="background:#1A1A2E; padding:0; position:relative; overflow:hidden; min-height:260px; align-items:stretch;">
+    <img src="https://images.unsplash.com/photo-1500835556837-99ac94a94552?w=1200&h=400&fit=crop&auto=format" alt="Travel" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.45;"/>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:2rem;padding:3rem 4vw;width:100%;">
+      <div class="cat-hero-icon" style="background:rgba(255,217,61,0.25);border-color:var(--yellow);backdrop-filter:blur(8px);">🌍</div>
+      <div class="cat-hero-text">
+        <h1 style="color:#fff;">Travel</h1>
+        <p style="color:rgba(255,255,255,0.75);">Slow trips, fast trains, street food, and the kind of travel that changes how you see home when you get back.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cat-articles">
+    <a href="https://www.theguardian.com/travel/2023/sep/16/slow-train-travel-europe-interrail" target="_blank" class="article-row" data-share-title="Slow Train, Fast Connections: Crossing Europe Without a Deadline" data-share-url="https://www.theguardian.com/travel/2023/sep/16/slow-train-travel-europe-interrail">
+      <span class="article-num">01</span>
+      <div class="article-thumb" style="background:#FFD93D18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=160&h=160&fit=crop&auto=format" alt="Train travel" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FFD93D18; border-color:var(--yellow);">Europe</span>
+        <h3>Slow Train, Fast Connections: Crossing Europe Without a Deadline</h3>
+        <p>When a missed flight turned into a month-long rail adventure, I discovered the country I thought I already knew.</p>
+        <div class="article-meta"><span>Lena M.</span><span>7 min read</span><span>Guardian</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.lonelyplanet.com/articles/best-destinations-solo-travel" target="_blank" class="article-row" data-share-title="The Best Destinations for Solo Travelers in 2025" data-share-url="https://www.lonelyplanet.com/articles/best-destinations-solo-travel">
+      <span class="article-num">02</span>
+      <div class="article-thumb" style="background:#6BCB7718;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=160&h=160&fit=crop&auto=format" alt="Solo travel" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#6BCB7718; border-color:var(--mint);">Solo Travel</span>
+        <h3>The Best Destinations for Solo Travelers in 2025</h3>
+        <p>From Tbilisi to Medellín — the cities that have quietly become the world's most welcoming for going it alone.</p>
+        <div class="article-meta"><span>Lonely Planet</span><span>8 min read</span><span>LonelyPlanet</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://matadornetwork.com/read/digital-nomad-visa-countries/" target="_blank" class="article-row" data-share-title="Every Country With a Digital Nomad Visa (And What It's Actually Like to Use One)" data-share-url="https://matadornetwork.com/read/digital-nomad-visa-countries/">
+      <span class="article-num">03</span>
+      <div class="article-thumb" style="background:#74C0FC18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1488998527040-85054a85150e?w=160&h=160&fit=crop&auto=format" alt="Digital nomad" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#74C0FC18; border-color:var(--sky);">Nomad Life</span>
+        <h3>Every Country With a Digital Nomad Visa (And What It's Actually Like to Use One)</h3>
+        <p>The honest guide to digital nomad visas: which ones work, which ones are bureaucratic nightmares, and which are worth it.</p>
+        <div class="article-meta"><span>Matador Network</span><span>12 min read</span><span>Matador</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.nationalgeographic.com/travel/article/overtourism-solutions" target="_blank" class="article-row" data-share-title="Overtourism Is Ruining Everything — Here's What Some Places Are Getting Right" data-share-url="https://www.nationalgeographic.com/travel/article/overtourism-solutions">
+      <span class="article-num">04</span>
+      <div class="article-thumb" style="background:#FF6B6B18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=160&h=160&fit=crop&auto=format" alt="Island beach" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FF6B6B18; border-color:var(--coral);">Sustainability</span>
+        <h3>Overtourism Is Ruining Everything — Here's What Some Places Are Getting Right</h3>
+        <p>Amsterdam, Santorini, Kyoto — the backlash against mass tourism is real, and the solutions are more creative than you'd think.</p>
+        <div class="article-meta"><span>National Geographic</span><span>9 min read</span><span>NatGeo</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.bbc.com/travel/article/20231010-street-food-best-cities" target="_blank" class="article-row" data-share-title="The World's Greatest Street Food Cities, Ranked by Someone Who Actually Went" data-share-url="https://www.bbc.com/travel/article/20231010-street-food-best-cities">
+      <span class="article-num">05</span>
+      <div class="article-thumb" style="background:#FFD93D18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?w=160&h=160&fit=crop&auto=format" alt="Street food" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#FFD93D18; border-color:var(--yellow);">Food Travel</span>
+        <h3>The World's Greatest Street Food Cities, Ranked by Someone Who Actually Went</h3>
+        <p>Bangkok, Penang, Mexico City, and the unsung challengers — a definitive but personal ranking of where to eat on foot.</p>
+        <div class="article-meta"><span>BBC Travel</span><span>6 min read</span><span>BBC</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+    <a href="https://www.afar.com/magazine/budget-travel-tips-that-actually-work" target="_blank" class="article-row" data-share-title="Budget Travel Tips That Actually Work (From People Who Travel Full-Time)" data-share-url="https://www.afar.com/magazine/budget-travel-tips-that-actually-work">
+      <span class="article-num">06</span>
+      <div class="article-thumb" style="background:#A78BFA18;padding:0;overflow:hidden;"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=160&h=160&fit=crop&auto=format" alt="Airplane window" style="width:100%;height:100%;object-fit:cover;border-radius:12px;"/></div>
+      <div class="article-info">
+        <span class="a-tag" style="background:#A78BFA18; border-color:var(--lavender);">Budget</span>
+        <h3>Budget Travel Tips That Actually Work (From People Who Travel Full-Time)</h3>
+        <p>Not generic "pack light" advice — the real hacks that seasoned travellers actually use to travel more for less.</p>
+        <div class="article-meta"><span>AFAR</span><span>8 min read</span><span>AFAR</span></div>
+      </div>
+      <button class="share-btn" onclick="toggleShareMenu(event, this)" aria-label="Share this article" title="Share">⤴</button>
+      <span class="article-link-btn">→</span>
+    </a>
+  </div>
+</div>
+
+
+<script>
+  // ════════════ SEARCH INDEX ════════════
+  // Built from every card / feature / article-row on the page so search works
+  // across the home grid AND all category pages.
+  const SEARCH_INDEX = [];
+
+  function buildSearchIndex() {
+    const seen = new Set();
+    document.querySelectorAll('a[data-share-title]').forEach(el => {
+      const url = el.getAttribute('href');
+      if (seen.has(url)) return; // avoid duplicate entries across home + category pages
+      seen.add(url);
+
+      const title = el.getAttribute('data-share-title') || '';
+      let excerpt = '';
+      let author = '';
+      let readTime = '';
+      let emoji = '✦';
+      let tag = '';
+
+      const excerptEl = el.querySelector('.card-excerpt, .fw-body p, .article-info p');
+      if (excerptEl) excerpt = excerptEl.textContent.trim();
+
+      const authorEl = el.querySelector('.card-author span, .article-meta span:first-child');
+      if (authorEl) author = authorEl.textContent.trim();
+
+      const readEl = el.querySelector('.read-time, .article-meta span:nth-child(2)');
+      if (readEl) readTime = readEl.textContent.trim();
+
+      const tagEl = el.querySelector('.card-tag, .a-tag');
+      if (tagEl) tag = tagEl.textContent.trim();
+
+      const emojiEl = el.querySelector('.emoji, .fw-thumb span, .article-thumb img');
+      if (emojiEl) {
+        if (emojiEl.tagName === 'IMG') emoji = '🖼️';
+        else emoji = emojiEl.textContent.trim();
+      }
+
+      SEARCH_INDEX.push({ title, excerpt, author, readTime, tag, emoji, url });
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const esc = escapeHtml(text);
+    const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(' + safeQuery + ')', 'ig');
+    return esc.replace(re, '<mark>$1</mark>');
+  }
+
+  function runSearch(query) {
+    const resultsEl = document.getElementById('search-results');
+    const q = query.trim().toLowerCase();
+
+    if (!q) {
+      resultsEl.innerHTML = '<div class="search-hint">Start typing to search across every ZEST story ✦</div>';
+      return;
+    }
+
+    const matches = SEARCH_INDEX.filter(item => {
+      return item.title.toLowerCase().includes(q) ||
+             item.excerpt.toLowerCase().includes(q) ||
+             item.author.toLowerCase().includes(q) ||
+             item.tag.toLowerCase().includes(q);
+    });
+
+    if (matches.length === 0) {
+      resultsEl.innerHTML = `<div class="search-empty">No stories found for "<strong>${escapeHtml(query)}</strong>" — try a different word.</div>`;
+      return;
+    }
+
+    resultsEl.innerHTML = matches.map(item => `
+      <a class="search-result-item" href="${item.url}" target="_blank">
+        <div class="search-result-thumb">${item.emoji}</div>
+        <div class="search-result-info">
+          <h4>${highlight(item.title, query)}</h4>
+          <span class="srm">${escapeHtml(item.tag)}${item.author ? ' · ' + escapeHtml(item.author) : ''}${item.readTime ? ' · ' + escapeHtml(item.readTime) : ''}</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function openSearch() {
+    document.getElementById('search-overlay').classList.add('active');
+    const input = document.getElementById('search-input');
+    input.value = '';
+    runSearch('');
+    setTimeout(() => input.focus(), 50);
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSearch() {
+    document.getElementById('search-overlay').classList.remove('active');
+    document.body.style.overflow = currentPage ? 'hidden' : '';
+  }
+
+  document.getElementById('search-input').addEventListener('input', e => runSearch(e.target.value));
+  document.getElementById('search-overlay').addEventListener('click', e => {
+    if (e.target.id === 'search-overlay') closeSearch();
+  });
+
+  // ════════════ DARK MODE ════════════
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('zest-theme', next); } catch (e) {}
+  }
+
+  (function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem('zest-theme'); } catch (e) {}
+    if (saved === 'dark' || saved === 'light') {
+      applyTheme(saved);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      applyTheme('dark');
+    }
+  })();
+
+  // ════════════ SOCIAL SHARING ════════════
+  function toggleShareMenu(e, btn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // close any other open menus
+    document.querySelectorAll('.share-menu.active').forEach(m => {
+      if (m !== btn.nextElementSibling) m.classList.remove('active');
+    });
+
+    let menu = btn.nextElementSibling;
+    if (menu && menu.classList.contains('share-menu')) {
+      menu.classList.toggle('active');
+      return;
+    }
+
+    const parent = btn.closest('a');
+    const title = parent.getAttribute('data-share-title') || document.title;
+    const url = parent.getAttribute('data-share-url') || parent.getAttribute('href');
+
+    menu = document.createElement('div');
+    menu.className = 'share-menu active';
+    menu.innerHTML = `
+      <button onclick="shareVia(event, 'twitter', '${escapeAttr(title)}', '${escapeAttr(url)}')"><span class="sm-icon">🐦</span> Share on X</button>
+      <button onclick="shareVia(event, 'facebook', '${escapeAttr(title)}', '${escapeAttr(url)}')"><span class="sm-icon">📘</span> Share on Facebook</button>
+      <button onclick="shareVia(event, 'linkedin', '${escapeAttr(title)}', '${escapeAttr(url)}')"><span class="sm-icon">💼</span> Share on LinkedIn</button>
+      <button onclick="shareVia(event, 'whatsapp', '${escapeAttr(title)}', '${escapeAttr(url)}')"><span class="sm-icon">💬</span> Share on WhatsApp</button>
+      <button onclick="shareVia(event, 'copy', '${escapeAttr(title)}', '${escapeAttr(url)}')"><span class="sm-icon">🔗</span> Copy link</button>
+    `;
+    btn.insertAdjacentElement('afterend', menu);
+
+    if (!btn.parentElement.style.position || btn.parentElement.style.position === 'static') {
+      // ensure positioning context exists (most parents are already position:relative via .card/.feature-wide/.article-row)
+    }
+  }
+
+  function escapeAttr(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  function shareVia(e, network, title, url) {
+    e.preventDefault();
+    e.stopPropagation();
+    const encodedUrl = encodeURIComponent(url);
+    const encodedTitle = encodeURIComponent(title);
+    let shareLink = '';
+
+    switch (network) {
+      case 'twitter':
+        shareLink = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+        break;
+      case 'facebook':
+        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'linkedin':
+        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+      case 'whatsapp':
+        shareLink = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+        break;
+      case 'copy':
+        copyToClipboard(url);
+        closeAllShareMenus();
+        return;
+    }
+
+    if (shareLink) {
+      window.open(shareLink, '_blank', 'noopener,noreferrer,width=600,height=500');
+    }
+    closeAllShareMenus();
+  }
+
+  function copyToClipboard(text) {
+    const finish = () => showShareToast('Link copied to clipboard ✦');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(finish).catch(() => fallbackCopy(text, finish));
+    } else {
+      fallbackCopy(text, finish);
+    }
+  }
+
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    cb();
+  }
+
+  function showShareToast(msg) {
+    const toast = document.getElementById('share-toast');
+    toast.textContent = msg;
+    toast.classList.add('active');
+    setTimeout(() => toast.classList.remove('active'), 2200);
+  }
+
+  function closeAllShareMenus() {
+    document.querySelectorAll('.share-menu.active').forEach(m => m.classList.remove('active'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.share-menu') && !e.target.closest('.share-btn')) {
+      closeAllShareMenus();
+    }
+  });
+
+  // ── CATEGORY PAGE OPEN/CLOSE ──
+  let currentPage = null;
+
+  function openCategory(cat) {
+    if (currentPage) {
+      document.getElementById('page-' + currentPage).classList.remove('active');
+    }
+    const page = document.getElementById('page-' + cat);
+    if (page) {
+      page.classList.add('active');
+      page.scrollTop = 0;
+      currentPage = cat;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeCategoryPage() {
+    if (currentPage) {
+      document.getElementById('page-' + currentPage).classList.remove('active');
+      currentPage = null;
+      document.body.style.overflow = '';
+    }
+  }
+
+  function showHome() {
+    closeCategoryPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('search-overlay').classList.contains('active')) {
+        closeSearch();
+      } else {
+        closeCategoryPage();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+
+  // ── CARD FILTER ──
+  function filterCards(cat, el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.querySelectorAll('#cards-grid .card').forEach(card => {
+      const show = cat === 'all' || card.dataset.cat === cat;
+      card.style.display = show ? '' : 'none';
+      if (show) {
+        card.style.animation = 'none';
+        card.offsetHeight;
+        card.style.animation = 'fadeUp 0.4s ease both';
+      }
+    });
+  }
+
+  // ── ✅ SECURITY FIX: Relative API URL (no more hardcoded localhost) ──
+  const API = "/api";
+
+  // ── CHARACTER COUNTER ──
+  const textarea = document.getElementById('c-message');
+  const charCount = document.getElementById('char-count');
+  if (textarea) {
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      charCount.textContent = `${len} / 2000`;
+      charCount.style.color = len > 1800 ? 'var(--coral)' : 'var(--muted-2)';
+    });
+  }
+
+  // ── NEWSLETTER ──
+  async function subscribeNewsletter() {
+    const emailEl = document.getElementById('nl-email');
+    const btn = document.querySelector('.nl-form button');
+    const email = emailEl.value.trim();
+    if (!email || !email.includes('@')) {
+      emailEl.style.borderColor = '#FF6B6B';
+      emailEl.placeholder = 'Please enter a valid email!';
+      return;
+    }
+    btn.textContent = 'Subscribing...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (res.status === 429) {
+        btn.textContent = '⏳ Too many attempts. Try later.';
+        btn.style.background = '#FF6B6B';
+        btn.style.color = '#fff';
+        setTimeout(() => { btn.textContent = "Subscribe — it's free ✦"; btn.style.background = ''; btn.style.color = ''; btn.disabled = false; }, 4000);
+        return;
+      }
+      if (data.success) {
+        btn.textContent = "🎉 You're in! Check your inbox.";
+        btn.style.background = '#6BCB77';
+        btn.style.color = '#fff';
+        emailEl.disabled = true;
+      } else {
+        btn.textContent = data.message;
+        btn.style.background = '#FF6B6B';
+        btn.style.color = '#fff';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = "Subscribe — it's free ✦"; btn.style.background = ''; btn.style.color = ''; }, 3000);
+      }
+    } catch(e) {
+      btn.textContent = '⚠️ Unable to connect to server';
+      btn.style.background = '#FF6B6B';
+      btn.style.color = '#fff';
+      btn.disabled = false;
+    }
+  }
+
+  // ── COMMENTS ──
+  async function loadComments(postId) {
+    try {
+      const res = await fetch(`${API}/comments/${postId}`);
+      if (res.status === 429) {
+        document.getElementById('comments-list').innerHTML = '<p style="color:#FF6B6B;font-size:0.9rem;">⏳ Too many requests. Please wait a moment.</p>';
+        return;
+      }
+      const data = await res.json();
+      const container = document.getElementById('comments-list');
+      container.innerHTML = '';
+      if (data.comments.length === 0) {
+        container.innerHTML = '<p style="color:var(--muted-2);font-size:0.9rem;">Be the first to comment! 👇</p>';
+        return;
+      }
+      data.comments.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'comment-item';
+        // ✅ SECURITY FIX: escapeHtml prevents XSS
+        div.innerHTML = `
+          <div class="comment-header">
+            <div class="comment-avatar">${escapeHtml(c.name[0].toUpperCase())}</div>
+            <div><strong>${escapeHtml(c.name)}</strong><span class="comment-time">${escapeHtml(c.created_at)}</span></div>
+          </div>
+          <p class="comment-text">${escapeHtml(c.message)}</p>`;
+        container.appendChild(div);
+      });
+      document.getElementById('comment-count').textContent = `${data.total} Comment${data.total !== 1 ? 's' : ''}`;
+    } catch(e) {
+      document.getElementById('comments-list').innerHTML = '<p style="color:#FF6B6B;font-size:0.9rem;">⚠️ Could not load comments. Please check the server.</p>';
+    }
+  }
+
+  async function submitComment() {
+    const name    = document.getElementById('c-name').value.trim();
+    const email   = document.getElementById('c-email').value.trim();
+    const message = document.getElementById('c-message').value.trim();
+    const btn     = document.getElementById('c-submit');
+
+    if (!name || !email || !message) {
+      btn.textContent = '⚠️ Please fill in all fields!';
+      btn.style.background = '#FF6B6B';
+      setTimeout(() => { btn.textContent = 'Post Comment ✦'; btn.style.background = ''; }, 2500);
+      return;
+    }
+    if (message.length < 5) {
+      btn.textContent = '⚠️ Comment is too short!';
+      btn.style.background = '#FF6B6B';
+      setTimeout(() => { btn.textContent = 'Post Comment ✦'; btn.style.background = ''; }, 2500);
+      return;
+    }
+
+    btn.textContent = 'Posting...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: 'featured-1', name, email, message })
+      });
+      const data = await res.json();
+      if (res.status === 429) {
+        btn.textContent = '⏳ Too many comments. Try later.';
+        btn.style.background = '#FF6B6B';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = 'Post Comment ✦'; btn.style.background = ''; }, 4000);
+        return;
+      }
+      if (data.success) {
+        btn.textContent = '🎉 Comment posted!';
+        btn.style.background = '#6BCB77';
+        document.getElementById('c-name').value = '';
+        document.getElementById('c-email').value = '';
+        document.getElementById('c-message').value = '';
+        charCount.textContent = '0 / 2000';
+        loadComments('featured-1');
+        setTimeout(() => { btn.textContent = 'Post Comment ✦'; btn.style.background = ''; btn.disabled = false; }, 3000);
+      } else {
+        btn.textContent = data.message;
+        btn.style.background = '#FF6B6B';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      btn.textContent = '⚠️ Unable to connect to server';
+      btn.style.background = '#FF6B6B';
+      btn.disabled = false;
+    }
+  }
+
+  buildSearchIndex();
+  loadComments('featured-1');
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.animation = 'fadeUp 0.6s ease both';
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.card, .feature-wide').forEach(el => {
+    el.style.opacity = '0';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
